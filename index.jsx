@@ -62,46 +62,46 @@ export const className = `
     }
 `
 
-const fetchStopSchedule = (id) => {
-    const data = `{\n  stop(id: \"HSL:${id}\") {\n    name\n      stoptimesWithoutPatterns {\n      scheduledArrival\n      realtimeArrival\n      arrivalDelay\n      scheduledDeparture\n      realtimeDeparture\n      departureDelay\n      realtime\n      realtimeState\n      serviceDay\n      headsign\n    }\n  }\n}`;
-    const xhr = new XMLHttpRequest();
-    xhr.withCredentials = true;
+const fetchStopSchedule = (id) => fetch('https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql', {
+    method: 'POST',
+    mode: 'cors',
+    cache: 'no-cache',
+    headers: {
+        'Content-Type': 'application/graphql'
+    },
+    body: `{\n  stop(id: \"HSL:${id}\") {\n    name\n      stoptimesWithoutPatterns {\n      scheduledArrival\n      realtimeArrival\n      arrivalDelay\n      scheduledDeparture\n      realtimeDeparture\n      departureDelay\n      realtime\n      realtimeState\n      serviceDay\n      headsign\n    }\n  }\n}`
+}).then(response => response.json()).then((res) => {
+    const arrivalElement = document.getElementById(`time${id}`);
+    let arrivalTime;
 
-    xhr.addEventListener("readystatechange", (t) => {
-        const res = JSON.parse(t.target.responseText);
-        const arrivalElement = document.getElementById(`time${id}`);
-        let arrivalTime;
-
-        for (let i = 0; i < 5; i++) {
-            if (res.data.stop.stoptimesWithoutPatterns[i].headsign !== 'Tapiola') {
-                arrivalTime = new Date(res.data.stop.stoptimesWithoutPatterns[i].realtimeArrival * 1000);
-                break;
-            }
+    for (let i = 0; i < 5; i++) {
+        if (res.data.stop.stoptimesWithoutPatterns[i].headsign !== 'Tapiola') {
+            arrivalTime = new Date(res.data.stop.stoptimesWithoutPatterns[i].realtimeArrival * 1000);
+            break;
         }
+    }
 
-        document.getElementById(id).innerHTML = res.data.stop.name
+    document.getElementById(id).innerHTML = res.data.stop.name
 
-        const minutesUntilArrival = arrivalTime.getMinutes() - new Date().getMinutes();
+    const minutesUntilArrival = arrivalTime.getMinutes() - new Date().getMinutes();
 
-        if (minutesUntilArrival === 1) {
-            arrivalElement.innerHTML = `~1 min`;
-        } else if (arrivalTime === 0) {
-            arrivalElement.innerHTML = `>1 min`
-        } else if (minutesUntilArrival < 0) {
-            arrivalElement.innerHTML = `${60 - new Date().getMinutes() + arrivalTime.getMinutes()} mins`;
-        } else {
-            arrivalElement.innerHTML = `${arrivalTime.getMinutes() - new Date().getMinutes()} mins`;
-        }
-    });
+    if (minutesUntilArrival === 1) {
+        arrivalElement.innerHTML = `~1 min`;
+    } else if (arrivalTime === 0) {
+        arrivalElement.innerHTML = `>1 min`
+    } else if (minutesUntilArrival < 0) {
+        arrivalElement.innerHTML = `${60 - new Date().getMinutes() + arrivalTime.getMinutes()} mins`;
+    } else {
+        arrivalElement.innerHTML = `${arrivalTime.getMinutes() - new Date().getMinutes()} mins`;
+    }
+}).catch((error) => {
+    console.log('Error occured')
+    const arrivalElement = document.getElementById(`time${id}`);
+    arrivalElement.innerHTML = 'Errors occured while fetching...';
+});
 
-    xhr.open("POST", "https://api.digitransit.fi/routing/v1/routers/hsl/index/graphql");
-    xhr.withCredentials = false
-    xhr.setRequestHeader("Content-Type", "application/graphql");
-    xhr.setRequestHeader("User-Agent", "PostmanRuntime/7.15.2");
-    xhr.setRequestHeader("Accept", "*/*");
-    xhr.setRequestHeader("Cache-Control", "no-cache");
-    xhr.setRequestHeader("Access-Control-Allow-Origin", "true");
-    xhr.send(data);
+export const command = () => {
+    options.stops.map((id) => fetchStopSchedule(id));
 }
 
 export const render = () => (
@@ -111,9 +111,8 @@ export const render = () => (
         </div>
         {
             options.stops.map((id, index) => {
-                fetchStopSchedule(id);
                 return (
-                    <div className="stop">
+                    <div key={id} className="stop">
                         <h1 className="stop-name" id={id}></h1>
                         <h2 className="stop-info" id={`time${id}`}></h2>
                     </div>
