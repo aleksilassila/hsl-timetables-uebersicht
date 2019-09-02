@@ -86,7 +86,7 @@ const fetchStopSchedule = (id) => fetch('https://api.digitransit.fi/routing/v1/r
     const minutesUntilArrival = arrivalTime.getMinutes() - new Date().getMinutes();
 
     if (minutesUntilArrival === 1) {
-        arrivalElement.innerHTML = `~1 min`;
+        arrivalElement.innerHTML = `1 min`;
     } else if (arrivalTime === 0) {
         arrivalElement.innerHTML = `>1 min`
     } else if (minutesUntilArrival < 0) {
