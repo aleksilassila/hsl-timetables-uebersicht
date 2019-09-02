@@ -36,17 +36,17 @@ export const className = `
     }
 
     #heading {
-        background: rgba(0, 0, 0, 0.7);
+        background: rgba(255, 255, 255, 0.3);
+        border-bottom: 1px solid rgba(50,50, 50, .4);
         border-top-left-radius: 7px;
         border-top-right-radius: 7px;
-        border-bottom: 1px solid rgba(255,255, 255, .1);
-        position: relative;
-        color: rgba(255,255,255,0.4);
+        font-size: 12px;
+        text-align: center;
+        padding: 5px 0;
     }
 
     .stop-name {
         font-size: 12px;
-        text-align: left;
         font-weight: 600;
         color: rgba(0,0,0,0.7);
         margin: 0;
@@ -57,7 +57,7 @@ export const className = `
         font-weight: 500;
         font-size: 11px;
         color: rgba(0,0,0,0.7);
-        margin: 0; 
+        margin: 0;
         padding: 0;
     }
 `
@@ -106,6 +106,9 @@ const fetchStopSchedule = (id) => {
 
 export const render = () => (
     <div id="widget">
+        <div id="heading">
+            HSL Timetables
+        </div>
         {
             options.stops.map((id, index) => {
                 fetchStopSchedule(id);
